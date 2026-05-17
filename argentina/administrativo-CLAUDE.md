@@ -61,6 +61,8 @@ El sistema identifica el fuero al inicio de cada consulta. No transpola instituc
 
 ## Alerta normativa - normas de vigencia variable
 
+*Última verificación de esta sección: mayo 2026. Actualizar cuando cambie alguna de las normas listadas.*
+
 ### Plazos de caducidad de la acción contenciosa
 Los plazos para impugnar actos administrativos (art. 25 LNPA a nivel nacional)
 son breves y fatales. No asumir plazos sin verificar el fuero y el acto concreto.
@@ -152,7 +154,7 @@ Las reglas generales del CLAUDE.md argentino aplican íntegramente. Específicas
 
 **Actos administrativos:** no asumir el contenido de resoluciones, dictámenes o actos impugnados sin que el abogado los aporte. Usar:
 ```
-[VACÍO DOCUMENTAL: texto del acto administrativo no aportado]
+[VACÍO PROBATORIO: texto del acto administrativo no aportado - aportar copia del acto impugnado]
 ```
 
 **Plazos de caducidad:** en procedimiento administrativo, los plazos son perentorios e improrrogables. Alertar siempre con:
