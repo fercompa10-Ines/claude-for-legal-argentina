@@ -148,7 +148,8 @@ Después:
 1. En [Claude.ai](https://claude.ai) entrás a **Projects** (barra lateral izquierda) y creás uno nuevo. Le ponés el nombre de tu práctica.
 2. Dentro del Project, hacés clic en el ícono de lápiz (**Project instructions**) y pegás el `CLAUDE.md` personalizado que te generó la entrevista. Queda activo en todas las conversaciones de ese Project.
 3. Subís los perfiles de área como **Knowledge** del Project (botón "Add content"). Ejemplos según tu fuero habitual:
-   - Administrativo federal: `argentina/administrativo-CLAUDE.md`
+   - Laboral: `argentina/laboral-CLAUDE.md` + `argentina/ejemplos-laboral.md`
+   - Civil: `argentina/civil-CLAUDE.md` + `argentina/ejemplos-civil.md`
    - Administrativo CABA: `argentina/administrativo-CLAUDE.md` + `argentina/administrativo-caba-CLAUDE.md`
    - Administrativo PBA: `argentina/administrativo-CLAUDE.md` + `argentina/administrativo-PBA-CLAUDE.md`
    - Administrativo Salta: `argentina/administrativo-CLAUDE.md` + `argentina/administrativo-SALTA-CLAUDE.md`
