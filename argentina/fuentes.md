@@ -12,6 +12,7 @@ sin que el abogado tenga que pegar el texto de la norma en la sesión.
 Compatible con cualquier cliente MCP estándar (Claude, OpenCode, u otros).
 Los conectores que exponen endpoint público (URL) no requieren instalación local.
 Los que usan `uvx` requieren Python con uv instalado.
+Los que se instalan manualmente desde GitHub requieren configurar `claude_desktop_config.json` y, según el conector, dependencias adicionales (Python, Chrome, chromedriver).
 
 ---
 
@@ -46,6 +47,7 @@ conector no estaba disponible.
 | 9 - guidobonomini | Análisis semántico / glosario | Operar con glosario del CLAUDE.md; calidad terminológica puede bajar |
 | 10 - Tesauro SAIJ | Vocabulario jurídico controlado | Usar terminología estándar CCCN y LCT directamente |
 | 11 - BORA Oficial | Boletín Oficial de la República Argentina | boletinoficial.gob.ar acceso directo |
+| 12 - scba-mcp-server | Sentencias y resoluciones de primera instancia PBA | sentencias.scba.gov.ar acceso directo |
 
 Cuando se usa el fallback manual (pegar texto en sesión), indicar siempre
 al inicio del texto pegado: fuente, fecha de consulta y URL de origen.
@@ -366,6 +368,39 @@ modificatorias individualmente, pero no consolida el texto.
 
 ---
 
+### 12. FacundoEmanuel/scba-mcp-server
+
+**Repositorio:** https://github.com/FacundoEmanuel/scba-mcp-server
+**Fuente:** https://sentencias.scba.gov.ar/ (portal de sentencias de primera instancia PBA - distinto de JUBA)
+**Función:** Scraper de sentencias y resoluciones de juzgados de primera instancia de PBA. Busca por organismo, rango de fechas y texto libre; devuelve el texto completo de cada documento y puede guardarlo en disco organizado por carpetas.
+**Instalación:** manual desde repositorio. Requiere Python 3.9+, Chrome instalado localmente y chromedriver compatible. No tiene instalación por URL ni por uvx.
+**Estado al mayo 2026:** proyecto de la comunidad, un solo commit. Verificar estado antes de usar.
+
+Herramientas disponibles:
+
+| Herramienta | Función |
+|---|---|
+| `listar_organismos` | Devuelve la lista de organismos disponibles (scraped en tiempo real del sitio) |
+| `listar_tipos_registro` | Devuelve los tipos disponibles: sentencias / resoluciones |
+| `buscar_documentos` | Busca y devuelve el texto completo de los documentos encontrados |
+| `guardar_documentos_en_disco` | Guarda los resultados como `.txt` organizados por organismo y tipo |
+| `cerrar_navegador` | Libera el Chrome al terminar la sesión |
+
+Casos de uso:
+- Buscar resoluciones o sentencias de un juzgado de primera instancia PBA por texto libre y rango de fechas
+- Armar un corpus de documentos de un organismo para análisis en sesión
+- Complementar al conector 3 (juba-mcp): JUBA cubre SCBA y cámaras; este cubre primera instancia
+
+Limitaciones:
+- **Solo primera instancia:** no cubre JUBA (SCBA ni cámaras de apelación PBA). Para esos, usar conector 3.
+- Requiere Chrome local: no funciona en entornos cloud ni en Claude.ai web. Solo para Claude Desktop o Claude Code en la máquina del abogado.
+- Scraper con pausas aleatorias: sesiones largas (muchos documentos) pueden ser lentas.
+- Un solo commit, sin tests, sin releases: mayor riesgo de rotura ante cambios del portal.
+
+**Fallback:** sentencias.scba.gov.ar acceso directo sin conector.
+
+---
+
 ## Tabla de decisión - qué conector usar
 
 | Necesidad | Conector recomendado | Alternativa |
@@ -381,6 +416,7 @@ modificatorias individualmente, pero no consolida el texto.
 | Análisis semántico / terminología | 9 (guidobonomini) | Glosario CLAUDE.md |
 | Mejorar búsquedas jurisprudenciales | 10 (Tesauro SAIJ) | SAIJ directo |
 | Texto de normas publicadas en BORA / sociedades / licitaciones | 11 (BORA Oficial) | boletinoficial.gob.ar directo |
+| Buscar sentencias/resoluciones de juzgados de primera instancia PBA | 12 (scba-mcp-server) | sentencias.scba.gov.ar directo |
 
 **Combinaciones recomendadas:**
 
@@ -391,11 +427,15 @@ modificatorias individualmente, pero no consolida el texto.
 - **11 + societario-CLAUDE.md:** due diligence societario. El 11 busca el acto constitutivo y modificaciones en el BORA; el perfil aporta la lógica de análisis LGS.
 - **10 + 4:** el Tesauro normaliza la terminología antes de ejecutar la búsqueda en SAIJ.
 - **1 + 9:** análisis de contratos. El 9 detecta terminología; el 1 verifica las normas citadas.
+- **3 + 12:** cobertura complementaria de jurisprudencia PBA. El 3 cubre SCBA y cámaras vía JUBA (y desde junio 2025 también primera instancia civil, laboral y contencioso administrativo). El 12 cubre primera instancia vía sentencias.scba.gov.ar con búsqueda por texto libre y descarga de documentos completos, funcionalidad que JUBA no expone con la misma granularidad. Hay solapamiento parcial en primera instancia desde junio 2025: usar el 12 cuando se necesite texto completo del documento o búsqueda por palabra clave dentro del cuerpo de la resolución.
 
 **Si dos conectores dan resultados contradictorios:**
 Los conectores 1-6 acceden a fuentes primarias oficiales: en caso de contradicción
 con cualquier otro conector o con el conocimiento base del sistema, prevalece
-la fuente primaria. Los conectores 9 y 10 son instrumentos auxiliares:
+la fuente primaria. El conector 12 también accede a una fuente oficial
+(sentencias.scba.gov.ar) pero es un scraper de mayor fragilidad técnica que 1-6:
+si sus resultados contradicen al conector 3 (juba-mcp) sobre el mismo documento,
+verificar directamente en el portal antes de proceder. Los conectores 9 y 10 son instrumentos auxiliares:
 si contradicen una fuente primaria, reportar la discrepancia al abogado con el marcador:
 
 ```
@@ -448,9 +488,6 @@ ante cualquier discrepancia con un conector.
 | COMARB | comarb.gov.ar | Convenio Multilateral - Ingresos Brutos |
 | TFN | jurisprudenciatfn.mecon.gob.ar | Jurisprudencia tributaria |
 | Boletín Oficial PBA | boletinoficial.gba.gob.ar | Publicaciones oficiales PBA |
-| Cuerpo Médico Forense CSJN | csjn.gov.ar/cmfcs | Informes, protocolos y estructura del CMF |
-| Protocolo de Estambul (ONU) | ohchr.org/es/publications/professional-interest/istanbul-protocol | Manual de investigación y documentación de tortura |
-| ANSES - normativa previsional | anses.gob.ar | Requisitos y normativa de invalidez previsional |
 
 ---
 
@@ -473,6 +510,26 @@ claude mcp add saij-mcp -- uvx saij-mcp
 claude mcp add csjn-mcp -- uvx csjn-mcp
 claude mcp add juscaba-mcp -- uvx juscaba-mcp
 ```
+
+**Manual desde GitHub (conector 12 - scba-mcp-server):**
+Requiere Python 3.9+, Chrome y chromedriver compatibles.
+```bash
+git clone https://github.com/FacundoEmanuel/scba-mcp-server.git
+cd scba-mcp-server
+pip install mcp selenium
+```
+Agregar al `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "scba-sentencias": {
+      "command": "python",
+      "args": ["C:/ruta/al/proyecto/scba_mcp_server.py"]
+    }
+  }
+}
+```
+En Mac/Linux usar ruta Unix. Reiniciar Claude Desktop después de guardar.
 
 **En Claude Code / Claude Cowork:**
 Agregar al archivo `.mcp.json` del proyecto o via configuración de MCP Servers.
